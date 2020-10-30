@@ -2,20 +2,32 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
-#define CHARMAX 1024
+#define INPUTMAX 102400
+#define BUFFMAX 1024
+
+typedef struct Token
+{
+	char type[20];
+	char tkWord[20];
+	int line;
+} Token;
 
 int main(int argc, char *argv[])
 {
 	char *keywords[] = { "start", "stop", "iter", "void", "int", "exit", "scanf", "printf", "main", "if", "then", "let", "data", "func" };
-	char pPos, *buffer, input[CHARMAX];
+	char *operators[] = { "\"", "=", "=>", "=<", "==", ":", "+", "-", "*", "/", "%", ".", "(", ")", ",", "{", "}", ";", "[", "]" };
+	char *types[] = { "keyword", "identifier", "operator", "number" };
+	char pPos, *buffer, input[INPUTMAX];
+	Token token = { .type = "", .tkWord = "", .line = 1 };
 	FILE *fp;
 
 	if (argc == 1 && !isatty(0))
 	{
                 printf("Incoming file from a pipe or some such!\n");
-                buffer = malloc(CHARMAX * sizeof(char));
-                while(fgets(buffer, CHARMAX - 1, stdin) != NULL)
+                buffer = malloc(INPUTMAX * sizeof(char));
+                while(fgets(buffer, INPUTMAX - 1, stdin) != NULL)
                         strcat(input, buffer);
                 printf("%s\n", input);
 		free(buffer);
@@ -70,52 +82,107 @@ int main(int argc, char *argv[])
 	}
 
 	int i = 0, j, k = 0, l = 0, line = 1;
-	buffer = malloc(CHARMAX * sizeof(char));
+	buffer = malloc(BUFFMAX * sizeof(char));
+	memset(buffer, '\0', BUFFMAX * sizeof(char));
 	while (input[i] != NULL)
 	{
-		j = 0;
-		buffer[k] = input[i];
-		if (input[i] == '\n')
-			line++;
-		k++;
-		while(j < 14)
+		if ((input[i] == '\n') || (input[i -1] && input[i - 1] == '\n'))
+			token.line++;
+		while (!isspace(input[i]))
 		{
-			if (strstr(buffer, keywords[j]) != NULL)
+			buffer[k++] = input[i];
+			//printf("buffer: %s\n", buffer);
+			j = 0;
+			while (j < 14)
 			{
-				if (keywords[j] == "int")
+				if (strcmp(buffer, keywords[j]) == 0)
 				{
-                        		if (input[i + 1] == 'f' && input[i - 3] == 'r' && input[i - 4] == 'p')
-					{
-						strcpy(buffer, "printf");
-                                        	printf("KEYWORD %s FOUND ON LINE %d\n", buffer, line);
-						memset(buffer, "\0", CHARMAX * sizeof(char) - 1);
-						k = 0;
-						break;
-					}
+					strcpy(token.type, "KEYWORD");
+					strcpy(token.tkWord, buffer);
+					printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+					memset(buffer, '\0', BUFFMAX * sizeof(char));
+					k = 0;
+					j = 0;
+					break;
 				}
-				strcpy(buffer, keywords[j]);
-				printf("KEYWORD %s FOUND ON LINE %d\n", buffer, line);
-				memset(buffer, "\0", CHARMAX * sizeof(char) - 1);
+				j++;
+			}
+			j = 0;
+			if (input[i + 1] && ispunct(input[i + 1]) && isalnum(input[i]))
+			{
+				strcpy(token.type, "IDENTIFIER");
+				strcpy(token.tkWord, buffer);
+				printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+				memset(buffer, '\0', BUFFMAX * sizeof(char));
 				k = 0;
+				j = 0;
 				break;
 			}
-			j++;
+			if (ispunct(input[i]))
+			{
+				while (j < 20)
+				{
+					if (strcmp(buffer, operators[j]) == 0)
+					{
+						if (operators[j] == "=")
+						{
+							if (input[i + 1] == '<')
+							{
+								strcpy(token.type, "OPERATOR");
+		               		                        strcpy(token.tkWord, "=<");
+                	       	        	                printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                	               		                memset(buffer, '\0', BUFFMAX * sizeof(char));
+                        	                       		k = 0;
+                                	               		j = 0;
+								break;
+							}
+                	                                if (input[i + 1] == '>')
+                	                                {
+                	                                        strcpy(token.type, "OPERATOR");
+                	                                        strcpy(token.tkWord, "=>");
+                	                                        printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                	                                        memset(buffer, '\0', BUFFMAX * sizeof(char));
+                	                                        k = 0;
+                	                                        j = 0;
+                	                                        break;
+                	                                }
+                        	                        if (input[i + 1] == '=')
+                               		                {
+                                	                        strcpy(token.type, "OPERATOR");
+                                       		                strcpy(token.tkWord, "==");
+                                                	        printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                                                	        memset(buffer, '\0', BUFFMAX * sizeof(char));
+                                                	        k = 0;
+                                                	        j = 0;
+                                                	       break;
+                                                	}
+						}
+						strcpy(token.type, "OPERATOR");
+						strcpy(token.tkWord, buffer);
+						printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+						memset(buffer, '\0', BUFFMAX * sizeof(char));
+						k = 0;
+						j = 0;
+						break;
+					}
+					j++;
+				}
+			}
+			i++;
 		}
 		i++;
+		if (buffer && (buffer[0] != '\0'))
+		{
+			strcpy(token.type, "IDENTIFIER");
+			strcpy(token.tkWord, buffer);
+			printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+			memset(buffer, '\0', BUFFMAX * sizeof(char));
+			k = 0;
+			j = 0;
+		}
 	}
 	free(buffer);
 
-/*
-	int j = 0, line = 0;
-	while(keywords[j])
-	{
-		if (strstr(input, keywords[j]) != NULL)
-		{
-			printf("KEYWORD FOUND: %s\n", keywords[j]);
-		}
-		j++;
-	}
-*/
 	printf("Done\n");
 
 	return 0;
