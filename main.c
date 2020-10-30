@@ -17,7 +17,7 @@ typedef struct Token
 int main(int argc, char *argv[])
 {
 	char *keywords[] = { "start", "stop", "iter", "void", "int", "exit", "scanf", "printf", "main", "if", "then", "let", "data", "func" };
-	char *operators[] = { "\"", "=", "=>", "=<", "==", ":", "+", "-", "*", "/", "%", ".", "(", ")", ",", "{", "}", ";", "[", "]" };
+	char *operators[] = { "=", "=>", "=<", "==", ":", "+", "-", "*", "/", "%", ".", "(", ")", ",", "{", "}", ";", "[", "]" };
 	char *types[] = { "keyword", "identifier", "operator", "number" };
 	char pPos, *buffer, input[INPUTMAX];
 	Token token = { .type = "", .tkWord = "", .line = 1 };
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 				{
 					strcpy(token.type, "KEYWORD");
 					strcpy(token.tkWord, buffer);
-					printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+					printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
 					memset(buffer, '\0', BUFFMAX * sizeof(char));
 					k = 0;
 					j = 0;
@@ -108,16 +108,6 @@ int main(int argc, char *argv[])
 				j++;
 			}
 			j = 0;
-			if (input[i + 1] && ispunct(input[i + 1]) && isalnum(input[i]))
-			{
-				strcpy(token.type, "IDENTIFIER");
-				strcpy(token.tkWord, buffer);
-				printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
-				memset(buffer, '\0', BUFFMAX * sizeof(char));
-				k = 0;
-				j = 0;
-				break;
-			}
 			if (ispunct(input[i]))
 			{
 				while (j < 20)
@@ -130,7 +120,7 @@ int main(int argc, char *argv[])
 							{
 								strcpy(token.type, "OPERATOR");
 		               		                        strcpy(token.tkWord, "=<");
-                	       	        	                printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                	       	        	                printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
                 	               		                memset(buffer, '\0', BUFFMAX * sizeof(char));
                         	                       		k = 0;
                                 	               		j = 0;
@@ -140,7 +130,7 @@ int main(int argc, char *argv[])
                 	                                {
                 	                                        strcpy(token.type, "OPERATOR");
                 	                                        strcpy(token.tkWord, "=>");
-                	                                        printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                	                                        printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
                 	                                        memset(buffer, '\0', BUFFMAX * sizeof(char));
                 	                                        k = 0;
                 	                                        j = 0;
@@ -150,7 +140,7 @@ int main(int argc, char *argv[])
                                		                {
                                 	                        strcpy(token.type, "OPERATOR");
                                        		                strcpy(token.tkWord, "==");
-                                                	        printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                                                	        printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
                                                 	        memset(buffer, '\0', BUFFMAX * sizeof(char));
                                                 	        k = 0;
                                                 	        j = 0;
@@ -159,7 +149,7 @@ int main(int argc, char *argv[])
 						}
 						strcpy(token.type, "OPERATOR");
 						strcpy(token.tkWord, buffer);
-						printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+						printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
 						memset(buffer, '\0', BUFFMAX * sizeof(char));
 						k = 0;
 						j = 0;
@@ -168,14 +158,24 @@ int main(int argc, char *argv[])
 					j++;
 				}
 			}
+                        if ((buffer[0] != '\0' && input[i + 1] && ispunct(input[i + 1])) || (buffer[0] != '\0' && ispunct(input[i]) && input[i + 1] && isalnum(input[i + 1])))
+                        {
+                                strcpy(token.type, "IDENTIFIER");
+                                strcpy(token.tkWord, buffer);
+                                printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
+                                memset(buffer, '\0', BUFFMAX * sizeof(char));
+                                k = 0;
+                                j = 0;
+                                break;
+                        }
 			i++;
 		}
 		i++;
-		if (buffer && (buffer[0] != '\0'))
+		if (buffer && buffer[0] != '\0')
 		{
 			strcpy(token.type, "IDENTIFIER");
 			strcpy(token.tkWord, buffer);
-			printf("%s %s found on line %d\n", token.type, token.tkWord, token.line);
+			printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
 			memset(buffer, '\0', BUFFMAX * sizeof(char));
 			k = 0;
 			j = 0;
