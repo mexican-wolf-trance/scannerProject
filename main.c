@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
         	}
 	}
 
-	int i = 0, j, k = 0, l = 0, line = 1;
+	int i = 0, j, k = 0, l = 0, line = 1, num[20];
 	buffer = malloc(BUFFMAX * sizeof(char));
 	memset(buffer, '\0', BUFFMAX * sizeof(char));
 	while (input[i] != NULL)
@@ -91,7 +91,6 @@ int main(int argc, char *argv[])
 		while (!isspace(input[i]))
 		{
 			buffer[k++] = input[i];
-			//printf("buffer: %s\n", buffer);
 			j = 0;
 			while (j < 14)
 			{
@@ -124,6 +123,7 @@ int main(int argc, char *argv[])
                 	               		                memset(buffer, '\0', BUFFMAX * sizeof(char));
                         	                       		k = 0;
                                 	               		j = 0;
+								i++;
 								break;
 							}
                 	                                if (input[i + 1] == '>')
@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
                 	                                        memset(buffer, '\0', BUFFMAX * sizeof(char));
                 	                                        k = 0;
                 	                                        j = 0;
+								i++;
                 	                                        break;
                 	                                }
                         	                        if (input[i + 1] == '=')
@@ -144,6 +145,7 @@ int main(int argc, char *argv[])
                                                 	        memset(buffer, '\0', BUFFMAX * sizeof(char));
                                                 	        k = 0;
                                                 	        j = 0;
+								i++;
                                                 	       break;
                                                 	}
 						}
@@ -158,7 +160,7 @@ int main(int argc, char *argv[])
 					j++;
 				}
 			}
-                        if ((buffer[0] != '\0' && input[i + 1] && ispunct(input[i + 1])) || (buffer[0] != '\0' && ispunct(input[i]) && input[i + 1] && isalnum(input[i + 1])))
+                        if ((buffer[0] != '\0' && input[i + 1] && ispunct(input[i + 1]) && !isdigit(input[i])) || (buffer[0] != '\0' && ispunct(input[i]) && input[i + 1] && isalnum(input[i + 1])))
                         {
                                 strcpy(token.type, "IDENTIFIER");
                                 strcpy(token.tkWord, buffer);
@@ -168,6 +170,17 @@ int main(int argc, char *argv[])
                                 j = 0;
                                 break;
                         }
+			if (buffer[0] != '\0' && input[i + 1] && ispunct(input[i + 1]) && isdigit(input[i]))
+			{
+	                        strcpy(token.type, "NUMBER");
+       		                strcpy(token.tkWord, buffer);
+       		                //sprintf(token.tkWord, "%d", num);
+                	        printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
+                       		memset(buffer, '\0', BUFFMAX * sizeof(char));
+                        	k = 0;
+                        	j = 0;
+				break;
+			}
 			i++;
 		}
 		i++;
