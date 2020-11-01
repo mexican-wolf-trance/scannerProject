@@ -4,21 +4,25 @@
 #include <string.h>
 #include <ctype.h>
 
-#define INPUTMAX 102400
-#define BUFFMAX 1024
+#include "token.h"
+#include "scanner.h"
 
+#define INPUTMAX 102400
+//#define BUFFMAX 1024
+
+/*
 typedef struct Token
 {
 	char type[20];
 	char tkWord[20];
 	int line;
 } Token;
-
+*/
 int main(int argc, char *argv[])
 {
-	char *keywords[] = { "start", "stop", "iter", "void", "int", "exit", "scanf", "printf", "main", "if", "then", "let", "data", "func" };
-	char *operators[] = { "=", "=>", "=<", "==", ":", "+", "-", "*", "/", "%", ".", "(", ")", ",", "{", "}", ";", "[", "]" };
-	char *types[] = { "keyword", "identifier", "operator", "number" };
+//	char *keywords[] = { "start", "stop", "iter", "void", "int", "exit", "scanf", "printf", "main", "if", "then", "let", "data", "func" };
+//	char *operators[] = { "=", "=>", "=<", "==", ":", "+", "-", "*", "/", "%", ".", "(", ")", ",", "{", "}", ";", "[", "]" };
+//	enum Types { KEYWORD, OPERATOR, NUMBER, IDENTIFIER };
 	char pPos, *buffer, input[INPUTMAX];
 	Token token = { .type = "", .tkWord = "", .line = 1 };
 	FILE *fp;
@@ -80,10 +84,12 @@ int main(int argc, char *argv[])
 			printf("%s\n", input);
         	}
 	}
+//	int i = 0, j, k = 0, l = 0, line = 1, num[20];
+//	buffer = malloc(BUFFMAX * sizeof(char));
+//	memset(buffer, '\0', BUFFMAX * sizeof(char));
 
-	int i = 0, j, k = 0, l = 0, line = 1, num[20];
-	buffer = malloc(BUFFMAX * sizeof(char));
-	memset(buffer, '\0', BUFFMAX * sizeof(char));
+	scanner(input, token);
+/*
 	while (input[i] != NULL)
 	{
 		if ((input[i] == '\n') || (input[i -1] && input[i - 1] == '\n'))
@@ -195,7 +201,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	free(buffer);
-
+*/
 	printf("Done\n");
 
 	return 0;
