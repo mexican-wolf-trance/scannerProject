@@ -128,16 +128,17 @@ int scanner(char *input, struct Token token)
 					j = 0;
 					break;
 				}
-        	                if (isupper(buffer[0]) || isdigit(buffer[0]))
+        	                if (isupper(input[i]) || isdigit(input[i]))
         	                {
-        	                                strcpy(token.type, idType(type = 100));
-        	                                strcpy(token.tkWord, buffer);
-        	                                printf("LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
-        	                                fprintf(scannerFP, "LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
-        	                                memset(buffer, '\0', BUFFMAX * sizeof(char));
-        	                                k = 0;
-        	                                j = 0;
-						break;
+					printf("This one\n");
+        	                      	strcpy(token.type, idType(type = 100));
+        	                       	strcpy(token.tkWord, buffer);
+        	                       	printf("LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
+        	                       	fprintf(scannerFP, "LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
+        	                       	memset(buffer, '\0', BUFFMAX * sizeof(char));
+        	                        k = 0;
+        	                        j = 0;
+					break;
 	                        }
                                 strcpy(token.type, idType(type = IDENTIFIER));
                                 strcpy(token.tkWord, buffer);
@@ -166,13 +167,40 @@ int scanner(char *input, struct Token token)
                 {
 			if (isupper(buffer[0]) || isdigit(buffer[0]))
 			{
-                                        strcpy(token.type, idType(type = 100));
-                                        strcpy(token.tkWord, buffer);
-                                        printf("LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
-                                        fprintf(scannerFP, "LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
-                                        memset(buffer, '\0', BUFFMAX * sizeof(char));
-                                        k = 0;
-                                        j = 0;
+                                        if (isdigit(buffer[0]))
+                                        {
+						int b = 0;
+                                                while ((buffer[b]) != '\0')
+                                                {
+                                                        if (isalpha(buffer[i]) && ispunct(buffer[i]))
+                                                        {
+                                                                type = 100;
+                                                                break;
+                                                        }
+							b++;
+                                                }
+                                        }
+                                        if (type == 100)
+                                        {
+                                                strcpy(token.type, idType(type));
+                                                strcpy(token.tkWord, buffer);
+                                                printf("LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
+                                                fprintf(scannerFP, "LEXICAL %s: %s on line %d is not a proper identifier\n", token.type, token.tkWord, token.line);
+                                                memset(buffer, '\0', BUFFMAX * sizeof(char));
+                                                k = 0;
+                                                j = 0;
+                                        }
+					else
+					{
+                                        	strcpy(token.type, idType(type = NUMBER));
+                                        	strcpy(token.tkWord, buffer);
+                                        	printf("%s \"%s\" found on line %d\n", token.type, token.tkWord, token.line);
+                                        	fprintf(scannerFP, "%s %s found on line %d\n", token.type, token.tkWord, token.line);
+                                        	memset(buffer, '\0', BUFFMAX * sizeof(char));
+                                        	k = 0;
+                                        	j = 0;
+					}
+
 			}
 			else
 			{
